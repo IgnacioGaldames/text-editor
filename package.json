@@ -2,7 +2,7 @@
   "name": "wordcraft-writer",
   "displayName": "WordCraft Writer",
   "description": "A distraction-free prose editor inside VS Code. Write .md and .txt files with word count goals, real-time stats, and code-like syntax coloring by part of speech.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "antigravity",
   "engines": {
     "vscode": "^1.80.0"
@@ -126,17 +126,17 @@
         },
         "wordcraft.highlighting.colorPrepositions": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "Color prepositions (similar to operator color in code themes)."
         },
         "wordcraft.highlighting.colorConjunctions": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "Color conjunctions (similar to keyword color in code themes)."
         },
         "wordcraft.highlighting.colorPronouns": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "Color pronouns (similar to variable color in code themes)."
         }
       }

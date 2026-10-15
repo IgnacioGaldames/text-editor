@@ -59,9 +59,9 @@ export function readHighlightingConfig(): HighlightingConfig {
     colorVerbs:        config.get<boolean>('highlighting.colorVerbs',      true),
     colorAdjectives:   config.get<boolean>('highlighting.colorAdjectives', true),
     colorAdverbs:      config.get<boolean>('highlighting.colorAdverbs',    true),
-    colorPrepositions: config.get<boolean>('highlighting.colorPrepositions', false),
-    colorConjunctions: config.get<boolean>('highlighting.colorConjunctions', false),
-    colorPronouns:     config.get<boolean>('highlighting.colorPronouns',   false),
+    colorPrepositions: config.get<boolean>('highlighting.colorPrepositions', true),
+    colorConjunctions: config.get<boolean>('highlighting.colorConjunctions', true),
+    colorPronouns:     config.get<boolean>('highlighting.colorPronouns',   true),
   };
 }
 
