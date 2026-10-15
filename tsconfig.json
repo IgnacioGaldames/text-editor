@@ -1,0 +1,49 @@
+{
+  "compilerOptions": {
+    // ─────────────────────────────────────────────────────
+    // Target & Module
+    // VS Code extensions run in Node.js, so we target ES2020
+    // and use CommonJS modules (required by the extension host).
+    // ─────────────────────────────────────────────────────
+    "target": "ES2020",
+    "module": "commonjs",
+    "lib": ["ES2020"],
+
+    // ─────────────────────────────────────────────────────
+    // Output
+    // TypeScript type-checking only; esbuild does the actual
+    // bundling. outDir is set so tsc doesn't complain but we
+    // use --noEmit during development.
+    // ─────────────────────────────────────────────────────
+    "outDir": "./dist",
+    "rootDir": "./src",
+
+    // ─────────────────────────────────────────────────────
+    // Strictness
+    // Strict mode catches bugs early. Every setting below
+    // is intentionally ON.
+    // ─────────────────────────────────────────────────────
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
+    // ─────────────────────────────────────────────────────
+    // Interop & Resolution
+    // ─────────────────────────────────────────────────────
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+
+    // ─────────────────────────────────────────────────────
+    // Source Maps
+    // Enables breakpoint debugging in the Extension Host.
+    // ─────────────────────────────────────────────────────
+    "sourceMap": true,
+    "declaration": false
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts"]
+}

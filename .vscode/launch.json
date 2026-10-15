@@ -1,0 +1,37 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      // ─────────────────────────────────────────────
+      // Launch Extension (Debug Mode)
+      // Press F5 to open a new VS Code window with
+      // the extension loaded. Breakpoints work.
+      // ─────────────────────────────────────────────
+      "name": "Launch Extension",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/dist/**/*.js"
+      ],
+      "preLaunchTask": "npm: build",
+      "sourceMaps": true,
+      "smartStep": true,
+      "internalConsoleOptions": "openOnSessionStart"
+    },
+    {
+      // ─────────────────────────────────────────────
+      // Attach to Running Extension
+      // Use if you already launched via 'watch' mode
+      // and want to attach a debugger without rebuilding.
+      // ─────────────────────────────────────────────
+      "name": "Attach to Extension Host",
+      "type": "extensionHost",
+      "request": "attach",
+      "port": 9229,
+      "sourceMaps": true
+    }
+  ]
+}

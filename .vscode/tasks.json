@@ -1,0 +1,48 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      // ─────────────────────────────────────────────
+      // Build (Development)
+      // Bundles the extension with source maps.
+      // Run with: Ctrl+Shift+B
+      // ─────────────────────────────────────────────
+      "type": "npm",
+      "script": "build",
+      "label": "npm: build",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$tsc"],
+      "detail": "Bundle extension with esbuild (development)"
+    },
+    {
+      // ─────────────────────────────────────────────
+      // Watch (Auto-rebuild on save)
+      // Run this task in the terminal and the extension
+      // will rebuild automatically on every file save.
+      // ─────────────────────────────────────────────
+      "type": "npm",
+      "script": "watch",
+      "label": "npm: watch",
+      "problemMatcher": ["$tsc-watch"],
+      "isBackground": true,
+      "group": "build",
+      "detail": "Watch and auto-rebuild on file changes"
+    },
+    {
+      // ─────────────────────────────────────────────
+      // Type Check
+      // Validates TypeScript types without emitting files.
+      // Useful for catching type errors without rebuilding.
+      // ─────────────────────────────────────────────
+      "type": "npm",
+      "script": "typecheck",
+      "label": "npm: typecheck",
+      "problemMatcher": ["$tsc"],
+      "group": "test",
+      "detail": "Run TypeScript type checker (no emit)"
+    }
+  ]
+}

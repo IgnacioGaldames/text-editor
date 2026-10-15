@@ -1,0 +1,42 @@
+# =============================================================================
+# .gitignore - WordCraft Writer Extension
+# =============================================================================
+
+# Dependencias de Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Salidas de compilación / bundle
+dist/
+out/
+build/
+*.tsbuildinfo
+
+# Empaquetado de extensiones VS Code (.vsix)
+*.vsix
+
+# Entornos y variables locales
+.env
+.env.local
+.env.*.local
+
+# Archivos de depuración y logs del sistema
+*.log
+logs/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+
+# Archivos temporales de editores
+*.swp
+*.swo
+*~
+.idea/
+*.sublime-project
+*.sublime-workspace
