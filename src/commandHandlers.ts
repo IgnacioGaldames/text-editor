@@ -12,6 +12,7 @@
 //   - wordcraft.setWordGoal         → Prompts user to set min/max word goal
 //   - wordcraft.toggleHighlighting  → Toggles part-of-speech coloring on/off
 //   - wordcraft.configureStatusBar  → QuickPick to choose which stats to display
+//   - wordcraft.toggleActive        → Quick ON/OFF switch (without disabling the plugin)
 //
 // USED BY: extension.ts (registered during activate())
 // =============================================================================
@@ -206,6 +207,41 @@ export async function handleConfigureStatusBar(
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PRIVATE HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Toggles WordCraft ON/OFF without disabling the extension.
+ * When OFF, all stats and highlighting are hidden, but the toggle button
+ * remains visible so the user can re-enable with a single click.
+ *
+ * @param statusBar   - The status bar manager (owns the active state).
+ * @param highlighter - The syntax highlighter to clear when toggling off.
+ */
+export async function handleToggleActive(
+  statusBar: StatusBarManager,
+  highlighter: SyntaxHighlighter,
+): Promise<void> {
+  const nowActive = statusBar.toggleActive();
+
+  const editor = vscode.window.activeTextEditor;
+  if (nowActive) {
+    // Re-apply everything for the current editor
+    if (editor) {
+      const text = editor.document.getText();
+      const config = readStatusBarConfig();
+      statusBar.update(text, config);
+      highlighter.applyDecorationsToEditor(editor);
+    }
+  } else {
+    // Clear highlighting decorations immediately
+    if (editor) {
+      highlighter.clearAllDecorations(editor);
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PRIVATE HELPERS (original section continues below)
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**

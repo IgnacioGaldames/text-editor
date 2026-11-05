@@ -67,26 +67,92 @@ Abre la paleta de comandos (`Ctrl + Shift + P` o `Cmd + Shift + P`) y busca:
 | `WordCraft: Set Word Goal (Min / Max)` | Abre un cuadro interactivo para fijar el límite mínimo y máximo de palabras. |
 | `WordCraft: Toggle Part-of-Speech Highlighting` | Enciende o apaga el resaltado gramatical estilo código. |
 | `WordCraft: Choose Status Bar Items to Display` | Menú con checkboxes para elegir qué estadísticas mostrar abajo. |
+| `WordCraft: Toggle ON/OFF (Quick Switch)` | Pausa/reanuda todas las funciones de WordCraft sin deshabilitar el plugin. Un ícono discreto `$(eye)` / `$(eye-closed)` en la barra inferior permite hacer toggle con un solo clic. |
 
 ---
 
-## 🛠️ Instalación y Compilación
+## 🚀 Cómo Instalar la Extensión (Uso Diario)
+
+Para tener WordCraft instalado de forma permanente en tu editor (VS Code, Antigravity o Cursor) sin necesidad de abrirlo en modo depuración (`F5`):
+
+### Paso 1: Generar el paquete instalador (`.vsix`)
+En la terminal del proyecto, ejecuta:
+```bash
+npm run package
+```
+Esto compilará el código y generará el archivo instalador en la raíz del proyecto (por ejemplo: `wordcraft-writer-0.1.1.vsix`).
+
+### Paso 2: Instalar en el editor
+
+Puedes instalarlo de cualquiera de estas dos formas:
+
+#### Opción A: Desde la interfaz gráfica (Recomendada)
+1. Abre el panel lateral de **Extensiones** (`Ctrl + Shift + X` en Windows/Linux o `Cmd + Shift + X` en Mac).
+2. Haz clic en el menú de los **tres puntos (`...`)** en la esquina superior derecha del panel de Extensiones.
+3. Selecciona **"Install from VSIX..."** (*Instalar desde VSIX...*).
+4. Navega hasta la carpeta del proyecto y selecciona el archivo `wordcraft-writer-0.1.1.vsix`.
+5. ¡Listo! La extensión quedará instalada de forma permanente.
+
+#### Opción B: Desde la terminal
+Ejecuta el siguiente comando según tu editor:
+- **VS Code:**
+  ```bash
+  code --install-extension wordcraft-writer-0.1.1.vsix
+  ```
+- **Cursor / Forks de VS Code:**
+  ```bash
+  cursor --install-extension wordcraft-writer-0.1.1.vsix
+  ```
+
+---
+
+## 🔄 Cómo Actualizar y Generar un Nuevo `.vsix` (Tras hacer cambios)
+
+Cada vez que hagas modificaciones en el código y quieras actualizar la versión instalada en tu editor:
+
+1. **(Recomendado) Subir la versión:**
+   Para que el editor reconozca que hay una actualización, incrementa la versión en `package.json` o ejecuta:
+   ```bash
+   npm version patch
+   ```
+   *(Esto subirá la versión automáticamente, por ejemplo de `0.1.1` a `0.1.2`)*.
+
+2. **Generar el nuevo `.vsix`:**
+   ```bash
+   npm run package
+   ```
+   > 💡 **Nota:** Este comando ejecuta automáticamente `npm run build:prod` antes de empaquetar, por lo que compila y minifica todo el código TypeScript sin que tengas que compilarlo manualmente antes.
+
+3. **Reinstalar en el editor:**
+   - **Desde la interfaz:** Menú `...` en Extensiones -> **"Install from VSIX..."** -> selecciona el nuevo archivo `.vsix`.
+   - **Desde la terminal:**
+     ```bash
+     code --install-extension wordcraft-writer-0.1.2.vsix
+     ```
+   Haz clic en **"Reload"** cuando el editor te lo solicite para activar la nueva versión.
+
+---
+
+## 💻 Desarrollo y Compilación (Para desarrolladores)
+
+Si vas a modificar el código fuente de la extensión:
 
 1. **Instalar dependencias:**
    ```bash
    npm install
    ```
 
-2. **Compilar para desarrollo:**
+2. **Compilar el proyecto:**
    ```bash
    npm run build
    ```
 
-3. **Modo vigilancia (recompilación automática al guardar):**
+3. **Modo vigilancia (recompilación automática al guardar cambios):**
    ```bash
    npm run watch
    ```
 
-4. **Probar la extensión:**
-   - Presiona `F5` en VS Code para abrir una nueva ventana de desarrollo con la extensión cargada.
-   - Abre un archivo `.md` o `.txt` y empieza a escribir.
+4. **Probar y depurar en vivo:**
+   - Presiona `F5` (o ve a la pestaña *Run and Debug* y dale a *Run Extension*).
+   - Se abrirá una nueva ventana aislada (*[Extension Development Host]*) con los cambios cargados al instante.
+   - Abre cualquier archivo `.md` o `.txt` para ver las funciones activas.

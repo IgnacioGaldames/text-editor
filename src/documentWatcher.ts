@@ -121,6 +121,23 @@ export class DocumentWatcher {
     });
 
     this.disposables.push(editorChangeDisposable, textChangeDisposable, configChangeDisposable);
+
+    // ── WordCraft toggle ON/OFF ──────────────────────────────────────────────
+    const toggleDisposable = this.statusBar.onDidChangeActive((isNowActive) => {
+      const activeEditor = vscode.window.activeTextEditor;
+      if (!activeEditor || !this.isSupportedDocument(activeEditor.document)) {
+        return;
+      }
+      if (isNowActive) {
+        // Re-apply everything
+        const text = activeEditor.document.getText();
+        const statusBarConfig = readStatusBarConfig();
+        this.statusBar.update(text, statusBarConfig);
+        this.highlighter.applyDecorationsToEditor(activeEditor);
+      }
+    });
+
+    this.disposables.push(toggleDisposable);
     this.context.subscriptions.push(...this.disposables);
   }
 
@@ -134,8 +151,16 @@ export class DocumentWatcher {
    */
   private onEditorBecameActive(editor: vscode.TextEditor): void {
     if (!this.isSupportedDocument(editor.document)) {
-      // Hide all stats when in a non-prose file (e.g., .py, .js, etc.)
+      // Hide all stats AND the toggle button when in a non-prose file
       this.statusBar.hideAll();
+      return;
+    }
+
+    // Always show the toggle button for supported documents
+    this.statusBar.showToggleButton();
+
+    // Only update stats/highlighting if WordCraft is active (not toggled OFF)
+    if (!this.statusBar.isActive) {
       return;
     }
 
@@ -155,6 +180,11 @@ export class DocumentWatcher {
    */
   private onDocumentTextChanged(editor: vscode.TextEditor): void {
     if (!this.isSupportedDocument(editor.document)) {
+      return;
+    }
+
+    // Skip stat recalculation if WordCraft is toggled OFF
+    if (!this.statusBar.isActive) {
       return;
     }
 

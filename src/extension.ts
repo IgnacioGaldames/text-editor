@@ -27,6 +27,7 @@ import {
   handleSetWordGoal,
   handleToggleHighlighting,
   handleConfigureStatusBar,
+  handleToggleActive,
 } from './commandHandlers';
 
 /**
@@ -86,6 +87,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     await handleConfigureStatusBar(statusBarManager);
   });
 
+  // Comando E: Toggle ON/OFF rápido (sin desactivar el plugin)
+  const cmdToggleActive = vscode.commands.registerCommand('wordcraft.toggleActive', async () => {
+    await handleToggleActive(statusBarManager, syntaxHighlighter);
+  });
+
   // ───────────────────────────────────────────────────────────────────────────
   // PASO 3: Registro de Suscripciones
   // Al agregar los objetos a `context.subscriptions`, VS Code los liberará
@@ -96,6 +102,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     cmdSetWordGoal,
     cmdToggleHighlighting,
     cmdConfigureStatusBar,
+    cmdToggleActive,
     {
       dispose: () => {
         syntaxHighlighter.dispose();

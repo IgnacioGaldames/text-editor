@@ -23,7 +23,8 @@
     "onCommand:wordcraft.openWriter",
     "onCommand:wordcraft.setWordGoal",
     "onCommand:wordcraft.toggleHighlighting",
-    "onCommand:wordcraft.configureStatusBar"
+    "onCommand:wordcraft.configureStatusBar",
+    "onCommand:wordcraft.toggleActive"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -46,6 +47,11 @@
       {
         "command": "wordcraft.configureStatusBar",
         "title": "WordCraft: Choose Status Bar Items to Display",
+        "category": "WordCraft"
+      },
+      {
+        "command": "wordcraft.toggleActive",
+        "title": "WordCraft: Toggle ON/OFF (Quick Switch)",
         "category": "WordCraft"
       }
     ],

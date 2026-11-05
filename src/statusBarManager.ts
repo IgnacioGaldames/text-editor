@@ -38,6 +38,12 @@ import type { StatusBarDisplayConfig } from './types';
  */
 const STATUS_BAR_PRIORITY_BASE = 110;
 
+/**
+ * Priority for the toggle ON/OFF button. Placed just to the LEFT of the
+ * progress bar (highest priority = furthest left among our items).
+ */
+const TOGGLE_BUTTON_PRIORITY = STATUS_BAR_PRIORITY_BASE + 7;
+
 // ─────────────────────────────────────────────────────────────────────────────
 // PUBLIC CLASS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -61,14 +67,37 @@ export class StatusBarManager {
   private readonly itemReadingTime:   vscode.StatusBarItem;
   private readonly itemProgressBar:   vscode.StatusBarItem;
 
-  /** Collects all items for easy iteration. */
+  /**
+   * Discrete toggle button: allows the user to turn all WordCraft features
+   * ON/OFF without disabling the extension. Sits to the left of the progress bar.
+   */
+  private readonly itemToggleButton:  vscode.StatusBarItem;
+
+  /** Collects all items for easy iteration (excludes the toggle button). */
   private readonly allItems: vscode.StatusBarItem[];
+
+  /**
+   * Runtime state: when false, the status bar stats and highlighting are
+   * hidden, but the extension remains fully loaded and the toggle button
+   * stays visible so the user can re-enable at any time.
+   */
+  private _isActive: boolean = true;
+
+  /** Event emitter that fires when the active state changes. */
+  private readonly _onDidChangeActive = new vscode.EventEmitter<boolean>();
+
+  /** Subscribe to this to react when the user toggles WordCraft on/off. */
+  public readonly onDidChangeActive: vscode.Event<boolean> = this._onDidChangeActive.event;
 
   // ──────────────────────────────────────────────────────────────────────────
   // CONSTRUCTOR
   // ──────────────────────────────────────────────────────────────────────────
 
   constructor(private readonly context: vscode.ExtensionContext) {
+    // Create the toggle ON/OFF button (discrete, leftmost of our items)
+    this.itemToggleButton = this.createItem(TOGGLE_BUTTON_PRIORITY, 'wordcraft.toggleActive');
+    this.updateToggleButtonAppearance();
+
     // Create each item with a unique priority so they appear left-to-right
     // in the order we define them. All are on the RIGHT side of the status bar.
     this.itemProgressBar    = this.createItem(STATUS_BAR_PRIORITY_BASE + 5, 'wordcraft.setWordGoal', 'Click to set word goal');
@@ -87,13 +116,56 @@ export class StatusBarManager {
       this.itemReadingTime,
     ];
 
-    // Register all items for cleanup when the extension deactivates
-    this.context.subscriptions.push(...this.allItems);
+    // Register all items (including toggle) for cleanup when the extension deactivates
+    this.context.subscriptions.push(this.itemToggleButton, ...this.allItems, this._onDidChangeActive);
   }
 
   // ──────────────────────────────────────────────────────────────────────────
   // PUBLIC METHODS
   // ──────────────────────────────────────────────────────────────────────────
+
+  /** Returns whether WordCraft features are currently active. */
+  public get isActive(): boolean {
+    return this._isActive;
+  }
+
+  /**
+   * Toggles the active state of WordCraft.
+   * When OFF: hides all stats and highlighting, but keeps the toggle button visible.
+   * When ON: re-shows everything normally.
+   *
+   * @returns The new active state.
+   */
+  public toggleActive(): boolean {
+    this._isActive = !this._isActive;
+    this.updateToggleButtonAppearance();
+
+    if (!this._isActive) {
+      // Hide all stat items (but not the toggle button)
+      for (const item of this.allItems) {
+        item.hide();
+      }
+    }
+
+    // Fire the event so DocumentWatcher can react
+    this._onDidChangeActive.fire(this._isActive);
+    return this._isActive;
+  }
+
+  /**
+   * Shows the toggle button in the status bar.
+   * Called when a supported document is active so the button is visible.
+   */
+  public showToggleButton(): void {
+    this.itemToggleButton.show();
+  }
+
+  /**
+   * Hides the toggle button. Called when no supported document is active.
+   */
+  public hideToggleButton(): void {
+    this.itemToggleButton.hide();
+  }
 
   /**
    * Updates all status bar items with fresh data from the document.
@@ -103,6 +175,14 @@ export class StatusBarManager {
    * @param config - Which items the user wants to see.
    */
   public update(text: string, config: StatusBarDisplayConfig): void {
+    // If WordCraft is toggled OFF, don't show any stats
+    if (!this._isActive) {
+      for (const item of this.allItems) {
+        item.hide();
+      }
+      return;
+    }
+
     const stats = calculateStatistics(text);
     const goal  = getWordGoalFromSettings();
     const status = getWordGoalStatus(stats.wordCount, goal);
@@ -196,6 +276,7 @@ export class StatusBarManager {
     for (const item of this.allItems) {
       item.hide();
     }
+    this.itemToggleButton.hide();
   }
 
   /**
@@ -203,6 +284,8 @@ export class StatusBarManager {
    * VS Code calls this automatically via `context.subscriptions`.
    */
   public dispose(): void {
+    this.itemToggleButton.dispose();
+    this._onDidChangeActive.dispose();
     for (const item of this.allItems) {
       item.dispose();
     }
@@ -272,6 +355,22 @@ export class StatusBarManager {
       case 'over-maximum':  return new vscode.ThemeColor('statusBarItem.errorForeground');
       case 'in-range':      return new vscode.ThemeColor('statusBarItem.prominentForeground');
       default:              return undefined;
+    }
+  }
+
+  /**
+   * Updates the toggle button's icon and tooltip to reflect the current state.
+   * Uses $(eye) when ON and $(eye-closed) when OFF for a discrete appearance.
+   */
+  private updateToggleButtonAppearance(): void {
+    if (this._isActive) {
+      this.itemToggleButton.text = '$(eye)';
+      this.itemToggleButton.tooltip = 'WordCraft: ON — Click to pause (hide stats & highlighting)';
+      this.itemToggleButton.color = undefined; // Default foreground
+    } else {
+      this.itemToggleButton.text = '$(eye-closed)';
+      this.itemToggleButton.tooltip = 'WordCraft: OFF — Click to resume';
+      this.itemToggleButton.color = new vscode.ThemeColor('disabledForeground');
     }
   }
 }
