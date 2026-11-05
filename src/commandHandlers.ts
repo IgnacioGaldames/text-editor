@@ -222,6 +222,7 @@ export async function handleToggleActive(
   highlighter: SyntaxHighlighter,
 ): Promise<void> {
   const nowActive = statusBar.toggleActive();
+  highlighter.setActive(nowActive);
 
   const editor = vscode.window.activeTextEditor;
   if (nowActive) {
@@ -233,9 +234,9 @@ export async function handleToggleActive(
       highlighter.applyDecorationsToEditor(editor);
     }
   } else {
-    // Clear highlighting decorations immediately
-    if (editor) {
-      highlighter.clearAllDecorations(editor);
+    // Clear highlighting decorations across all visible editors
+    for (const visibleEditor of vscode.window.visibleTextEditors) {
+      highlighter.clearAllDecorations(visibleEditor);
     }
   }
 }

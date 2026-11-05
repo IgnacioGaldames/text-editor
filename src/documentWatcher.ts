@@ -124,6 +124,7 @@ export class DocumentWatcher {
 
     // ── WordCraft toggle ON/OFF ──────────────────────────────────────────────
     const toggleDisposable = this.statusBar.onDidChangeActive((isNowActive) => {
+      this.highlighter.setActive(isNowActive);
       const activeEditor = vscode.window.activeTextEditor;
       if (!activeEditor || !this.isSupportedDocument(activeEditor.document)) {
         return;
@@ -134,6 +135,10 @@ export class DocumentWatcher {
         const statusBarConfig = readStatusBarConfig();
         this.statusBar.update(text, statusBarConfig);
         this.highlighter.applyDecorationsToEditor(activeEditor);
+      } else {
+        for (const visibleEditor of vscode.window.visibleTextEditors) {
+          this.highlighter.clearAllDecorations(visibleEditor);
+        }
       }
     });
 
@@ -161,6 +166,7 @@ export class DocumentWatcher {
 
     // Only update stats/highlighting if WordCraft is active (not toggled OFF)
     if (!this.statusBar.isActive) {
+      this.highlighter.clearAllDecorations(editor);
       return;
     }
 
@@ -210,6 +216,10 @@ export class DocumentWatcher {
   private onWordCraftSettingChanged(): void {
     const activeEditor = vscode.window.activeTextEditor;
     if (!activeEditor || !this.isSupportedDocument(activeEditor.document)) {
+      return;
+    }
+
+    if (!this.statusBar.isActive) {
       return;
     }
 

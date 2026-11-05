@@ -97,6 +97,9 @@ export class SyntaxHighlighter {
   /** The current user config (which parts of speech to show). */
   private config: HighlightingConfig;
 
+  /** Whether WordCraft features are currently active (toggled ON/OFF). */
+  private _isActive: boolean = true;
+
   // ──────────────────────────────────────────────────────────────────────────
   // CONSTRUCTOR
   // ──────────────────────────────────────────────────────────────────────────
@@ -127,7 +130,11 @@ export class SyntaxHighlighter {
     // Listen for active editor changes (switch tabs)
     const onEditorChangeDisposable = vscode.window.onDidChangeActiveTextEditor((editor) => {
       if (editor && this.isSupportedDocument(editor.document)) {
-        this.applyDecorationsToEditor(editor);
+        if (this._isActive && this.config.enabled) {
+          this.applyDecorationsToEditor(editor);
+        } else {
+          this.clearAllDecorations(editor);
+        }
       }
     });
 
@@ -139,12 +146,46 @@ export class SyntaxHighlighter {
   // PUBLIC METHODS
   // ──────────────────────────────────────────────────────────────────────────
 
+  /** Returns whether highlighting is currently active. */
+  public get isActive(): boolean {
+    return this._isActive;
+  }
+
+  /**
+   * Turns highlighting ON or OFF globally via the toggle button.
+   * When turned off, clears decorations from all visible text editors immediately.
+   */
+  public setActive(active: boolean): void {
+    this._isActive = active;
+    if (active) {
+      const editor = vscode.window.activeTextEditor;
+      if (editor && this.isSupportedDocument(editor.document)) {
+        this.applyDecorationsToEditor(editor);
+      }
+    } else {
+      if (this.debounceTimer) {
+        clearTimeout(this.debounceTimer);
+        this.debounceTimer = undefined;
+      }
+      if (this.scrollTimer) {
+        clearTimeout(this.scrollTimer);
+        this.scrollTimer = undefined;
+      }
+      for (const visibleEditor of vscode.window.visibleTextEditors) {
+        this.clearAllDecorations(visibleEditor);
+      }
+    }
+  }
+
   /**
    * Updates highlighting config and immediately re-applies decorations.
    * Call this when the user toggles a setting.
    */
   public updateConfig(newConfig: HighlightingConfig): void {
     this.config = newConfig;
+    if (!this._isActive) {
+      return;
+    }
     const editor = vscode.window.activeTextEditor;
     if (editor && this.isSupportedDocument(editor.document)) {
       this.applyDecorationsToEditor(editor);
@@ -156,8 +197,8 @@ export class SyntaxHighlighter {
    * Call this on startup or when switching to a new file.
    */
   public applyDecorationsToEditor(editor: vscode.TextEditor): void {
-    if (!this.config.enabled) {
-      // Clear all decorations when highlighting is disabled
+    if (!this._isActive || !this.config.enabled) {
+      // Clear all decorations when inactive or highlighting is disabled
       this.clearAllDecorations(editor);
       return;
     }
@@ -231,6 +272,9 @@ export class SyntaxHighlighter {
    * Replaces any pending timer (so rapid keystrokes only trigger one update).
    */
   private scheduleUpdate(editor: vscode.TextEditor): void {
+    if (!this._isActive || !this.config.enabled) {
+      return;
+    }
     if (this.debounceTimer) {
       clearTimeout(this.debounceTimer);
     }
@@ -244,6 +288,9 @@ export class SyntaxHighlighter {
    * Uses a shorter delay than the keystroke debounce.
    */
   private scheduleScrollUpdate(editor: vscode.TextEditor): void {
+    if (!this._isActive || !this.config.enabled) {
+      return;
+    }
     if (this.scrollTimer) {
       clearTimeout(this.scrollTimer);
     }
