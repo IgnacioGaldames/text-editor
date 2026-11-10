@@ -192,7 +192,7 @@ export class StatusBarManager {
     if (config.showWordCount) {
       const goalText = goal.max > 0
         ? ` / ${goal.max}`
-        : '';
+        : goal.min > 0 ? ` (min ${goal.min})` : '';
 
       // Add an icon based on goal status
       const statusIcon = this.getGoalStatusIcon(status);
@@ -202,7 +202,7 @@ export class StatusBarManager {
       this.itemWordCount.tooltip = new vscode.MarkdownString(
         `**WordCraft Statistics**\n\n` +
         `- Words: **${stats.wordCount}**\n` +
-        `- Goal: Min ${goal.min} / Max ${goal.max}\n` +
+        `- Goal: Min ${goal.min || 'none'} / Max ${goal.max || 'none'}\n` +
         `- Click to change word goal`
       );
 
