@@ -14,7 +14,8 @@
 // =============================================================================
 
 import * as vscode from 'vscode';
-import type { WordGoal, WordGoalStatus } from './types';
+import type { WordGoal } from './types';
+export { calculateProgressPercent, getWordGoalStatus } from './wordGoalLogic';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS
@@ -51,42 +52,6 @@ export async function saveWordGoalToSettings(goal: WordGoal): Promise<void> {
 }
 
 /**
- * Determines the status of the word count relative to the goal.
- *
- * @param wordCount - Current number of words in the document.
- * @param goal      - The min/max goal.
- * @returns A `WordGoalStatus` string describing the relationship.
- */
-export function getWordGoalStatus(wordCount: number, goal: WordGoal): WordGoalStatus {
-  // A goal of max=0 means the user hasn't configured anything meaningful
-  if (goal.max === 0) {
-    return 'no-goal';
-  }
-  if (wordCount < goal.min) {
-    return 'below-minimum';
-  }
-  if (wordCount > goal.max) {
-    return 'over-maximum';
-  }
-  return 'in-range';
-}
-
-/**
- * Calculates the progress percentage toward the maximum word goal.
- *
- * @param wordCount - Current number of words.
- * @param goal      - The min/max goal.
- * @returns A number between 0 and 100 (capped at 100).
- */
-export function calculateProgressPercent(wordCount: number, goal: WordGoal): number {
-  if (goal.max === 0) {
-    return 0;
-  }
-  const percent = (wordCount / goal.max) * 100;
-  return Math.min(100, Math.max(0, Math.round(percent)));
-}
-
-/**
  * Renders a text-based progress bar using Unicode block characters.
  * This makes the progress bar look like a code-style ASCII gauge.
  *
@@ -119,10 +84,10 @@ export async function promptUserToSetWordGoal(): Promise<void> {
 
   const minInput = await vscode.window.showInputBox({
     title: 'WordCraft: Set Word Goal (1 of 2)',
-    prompt: 'Enter the MINIMUM number of words (0 = no minimum)',
-    value: String(currentGoal.min),
+    prompt: 'Enter the MINIMUM number of words (leave empty for no minimum)',
+    value: currentGoal.min > 0 ? String(currentGoal.min) : '',
     placeHolder: 'e.g. 200',
-    validateInput: validateNumberInput,
+    validateInput: validateOptionalNumberInput,
   });
 
   // User pressed Escape
@@ -133,13 +98,15 @@ export async function promptUserToSetWordGoal(): Promise<void> {
   // ── Step 2: Ask for maximum ──────────────────────────────────────────────
   const maxInput = await vscode.window.showInputBox({
     title: 'WordCraft: Set Word Goal (2 of 2)',
-    prompt: 'Enter the MAXIMUM / TARGET number of words',
-    value: String(currentGoal.max),
+    prompt: 'Enter the MAXIMUM / TARGET number of words (leave empty for no maximum)',
+    value: currentGoal.max > 0 ? String(currentGoal.max) : '',
     placeHolder: 'e.g. 500',
     validateInput: (value) => {
-      const numError = validateNumberInput(value);
+      const numError = validateOptionalNumberInput(value);
       if (numError) { return numError; }
-      if (parseInt(value) <= parseInt(minInput)) {
+      const min = parseOptionalNumber(minInput);
+      const max = parseOptionalNumber(value);
+      if (min > 0 && max > 0 && max <= min) {
         return 'Maximum must be greater than the minimum';
       }
       return undefined;
@@ -152,14 +119,14 @@ export async function promptUserToSetWordGoal(): Promise<void> {
 
   // ── Step 3: Save and notify ──────────────────────────────────────────────
   const newGoal: WordGoal = {
-    min: parseInt(minInput, 10),
-    max: parseInt(maxInput, 10),
+    min: parseOptionalNumber(minInput),
+    max: parseOptionalNumber(maxInput),
   };
 
   await saveWordGoalToSettings(newGoal);
 
   vscode.window.showInformationMessage(
-    `WordCraft: Goal set! Min: ${newGoal.min} words | Max: ${newGoal.max} words`
+    `WordCraft: Goal set! Min: ${newGoal.min || 'none'} | Max: ${newGoal.max || 'none'}`
   );
 }
 
@@ -173,13 +140,16 @@ export async function promptUserToSetWordGoal(): Promise<void> {
  *
  * @returns Error message string if invalid, undefined if valid.
  */
-function validateNumberInput(value: string): string | undefined {
+function validateOptionalNumberInput(value: string): string | undefined {
   if (value.trim() === '') {
-    return 'Please enter a number';
+    return undefined;
   }
-  const num = parseInt(value, 10);
-  if (isNaN(num) || num < 0) {
+  if (!/^\d+$/.test(value.trim())) {
     return 'Please enter a valid non-negative number';
   }
   return undefined;
+}
+
+function parseOptionalNumber(value: string): number {
+  return value.trim() === '' ? 0 : Number(value.trim());
 }

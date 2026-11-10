@@ -48,19 +48,19 @@ export interface DocumentStatistics {
  * A warning indicator shows when word count is below the minimum.
  */
 export interface WordGoal {
-  /** Minimum words required. Show a warning when below this. */
+  /** Minimum words required; 0 means no minimum. */
   min: number;
 
-  /** Maximum / target words. Progress bar reaches 100% here. */
+  /** Maximum / target words; 0 means no maximum. */
   max: number;
 }
 
 /** Describes where the current word count sits relative to the goal. */
 export type WordGoalStatus =
   | 'below-minimum'    // wordCount < min
-  | 'in-range'         // min <= wordCount <= max
+  | 'in-range'         // wordCount satisfies the configured limits
   | 'over-maximum'     // wordCount > max
-  | 'no-goal';         // no goal set (max === 0)
+  | 'no-goal';         // neither limit is set
 
 // ─────────────────────────────────────────────────────────────────────────────
 // STATUS BAR DISPLAY CONFIG

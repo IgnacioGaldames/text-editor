@@ -23,8 +23,8 @@ El objetivo es no salir nunca del entorno de desarrollo (sin saltar a Word, Goog
    - Estimación de tiempo de lectura.
    - **Barra de progreso visual** interactiva (`████░░░░ 42%`).
 3. **Metas y Límites de Palabras:**
-   - Define un **Mínimo** (alerta en amarillo/rojo si estás por debajo).
-   - Define un **Máximo** (la barra de progreso se llena al alcanzarlo).
+   - Define un **Mínimo** (alerta en amarillo/rojo si estás por debajo) y/o un **Máximo** (la barra de progreso se llena al alcanzarlo).
+   - Deja cualquiera de los campos vacío en el comando de metas para quitar ese límite; también puedes establecerlo en `0` desde la configuración.
 4. **Selector Interactivo de Información:**
    - Puedes activar o desactivar cualquiera de los contadores directamente desde un menú multi-selección.
 

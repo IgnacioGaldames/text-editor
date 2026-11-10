@@ -67,13 +67,13 @@
           "type": "number",
           "default": 0,
           "minimum": 0,
-          "description": "Minimum word count goal. A warning appears when you are below this number."
+          "description": "Minimum word count goal. Set to 0 for no minimum."
         },
         "wordcraft.wordGoal.max": {
           "type": "number",
           "default": 500,
-          "minimum": 1,
-          "description": "Maximum word count goal. The progress bar fills to 100% at this number."
+          "minimum": 0,
+          "description": "Maximum word count goal. Set to 0 for no maximum."
         },
         "wordcraft.statusBar.showWordCount": {
           "type": "boolean",
@@ -160,6 +160,7 @@
   "scripts": {
     "vscode:prepublish": "npm run build:prod",
     "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap",
+    "test": "node --test test/wordGoalLogic.test.cjs",
     "build:prod": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --minify",
     "watch": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap --watch",
     "package": "npx @vscode/vsce package --no-dependencies --allow-missing-repository",
